@@ -8,8 +8,7 @@
   "packages": {
     ".": {
       "package-name": "nano-syntax-highlighting",
-      "changelog-path": "CHANGELOG.md",
-      "release-as": "1.0.0"
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }
