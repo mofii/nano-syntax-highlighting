@@ -1,0 +1,56 @@
+name: install-test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel in-flight runs on the same ref when a new commit arrives.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-install:
+    name: test-install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The script toggles wget/curl/unzip in and out of a sandbox $PATH,
+      # so all four tools need to be installed on the host first.
+      # Today's GitHub runner images ship all four on both OSes, but install
+      # only what's missing so we don't break if a future image drops one.
+      - name: Install required tools (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          missing=()
+          for t in nano wget curl unzip; do
+            command -v "$t" >/dev/null || missing+=("$t")
+          done
+          if (( ${#missing[@]} )); then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends "${missing[@]}"
+          fi
+
+      - name: Install required tools (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          for t in nano wget curl unzip; do
+            command -v "$t" >/dev/null || brew install "$t"
+          done
+
+      - name: Run install.sh scenarios
+        run: |
+          chmod +x install.sh tool/test-install.sh
+          ./tool/test-install.sh --quiet

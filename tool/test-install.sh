@@ -58,13 +58,16 @@ done
 HOMES=()
 
 cleanup() {
+  # `${arr[@]+"${arr[@]}"}` only expands when the array is non-empty.
+  # Required for bash 3.2 (macOS) which otherwise errors under `set -u`
+  # when expanding an empty array.
   if (( KEEP )); then
     echo
     echo "KEEP: leaving TESTBIN=$TESTBIN"
-    for h in "${HOMES[@]}"; do echo "KEEP: leaving HOME=$h"; done
+    for h in ${HOMES[@]+"${HOMES[@]}"}; do echo "KEEP: leaving HOME=$h"; done
   else
     rm -rf "$TESTBIN"
-    for h in "${HOMES[@]}"; do rm -rf "$h"; done
+    for h in ${HOMES[@]+"${HOMES[@]}"}; do rm -rf "$h"; done
   fi
 }
 trap cleanup EXIT
@@ -83,12 +86,14 @@ run_scenario() {
   echo "=============================================================="
 
   local rc
+  # `${arr[@]+"${arr[@]}"}` is the bash 3.2-safe way to expand an array
+  # under `set -u`; plain `"${arr[@]}"` errors when the array is empty.
   if (( QUIET )); then
-    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" "${INSTALL_ARGS[@]}" \
+    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"} \
       >/dev/null 2>&1
     rc=$?
   else
-    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" "${INSTALL_ARGS[@]}"
+    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"}
     rc=$?
   fi
 
