@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/mofii/nano-syntax-highlighting/compare/v1.0.0...v1.0.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* **install:** cross-platform sed, idempotent re-install, literal grep ([#5](https://github.com/mofii/nano-syntax-highlighting/issues/5)) ([c5d9df1](https://github.com/mofii/nano-syntax-highlighting/commit/c5d9df1f7897091e302d46a0cccdf8724c031278))
+
 ## 1.0.0 (2026-04-30)
 
 
