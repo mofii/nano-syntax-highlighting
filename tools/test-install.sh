@@ -4,14 +4,14 @@
 # touching the real ~/.nanorc or ~/.nano.
 #
 # Use bash, not zsh: this is a bash script and should be invoked as
-#   ./tool/test-install.sh
+#   ./tools/test-install.sh
 # (the shebang picks the right interpreter). Pasting the body into an
 # interactive zsh session will break on `#` comments and `(...)` tokens
 # because zsh treats those as glob qualifiers unless `interactive_comments`
 # is set.
 #
 # Usage:
-#   tool/test-install.sh [-l|--lite] [--keep] [--quiet]
+#   tools/test-install.sh [-l|--lite] [--keep] [--quiet]
 #     -l, --lite   pass -l through to install.sh in scenarios 1-5
 #                  (the dedicated lite scenario at the end always runs -l)
 #     --keep       keep the temp $HOME and $PATH dirs for post-mortem

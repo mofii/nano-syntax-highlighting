@@ -68,11 +68,18 @@ _fetch_sources() {
   # so derive it from the zip itself instead of guessing
   dir=$(unzip -Z -1 "$tmpzip" | head -1 | cut -d/ -f1)
   unzip -oq "$tmpzip"
-  # only copy the syntax files and the includes manifest — skip readme,
-  # license, tool/, .github/, etc. cp (rather than mv) merges into an
-  # existing ~/.nano/, so re-running install.sh doesn't fail on tool/.
-  # -P preserves symlinks (gitcommit.nanorc -> git.nanorc, etc.).
-  cp -P "${dir}"/*.nanorc "${dir}"/nanorc ./
+  # Only copy the syntax files (and the includes manifest). cp (rather than
+  # mv) merges into an existing ~/.nano/, so re-running install.sh doesn't
+  # fail on tools/. -P preserves symlinks (gitcommit.nanorc -> git.nanorc).
+  #
+  # v2.0.0 and earlier shipped a flat layout (.nanorc files at archive root);
+  # v2.0.1+ ship them under src/. Try the new layout first, fall back to the
+  # old one so this script works against any tag.
+  if [ -d "${dir}/src" ]; then
+    cp -P "${dir}"/src/*.nanorc "${dir}"/src/nanorc ./
+  else
+    cp -P "${dir}"/*.nanorc "${dir}"/nanorc ./
+  fi
   rm -rf "${dir}"
 }
 
