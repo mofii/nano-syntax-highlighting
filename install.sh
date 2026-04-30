@@ -73,23 +73,37 @@ _fetch_sources() {
   # archive root is "<repo>-<ref>" — for tags GitHub strips a leading "v",
   # so derive it from the zip itself instead of guessing
   dir=$(unzip -Z -1 "$tmpzip" | head -1 | cut -d/ -f1)
-  unzip -o "$tmpzip"
-  mv "${dir}"/* ./
+  unzip -oq "$tmpzip"
+  # only copy the syntax files and the includes manifest — skip readme,
+  # license, tool/, .github/, etc. cp (rather than mv) merges into an
+  # existing ~/.nano/, so re-running install.sh doesn't fail on tool/.
+  # -P preserves symlinks (gitcommit.nanorc -> git.nanorc, etc.).
+  cp -P "${dir}"/*.nanorc "${dir}"/nanorc ./
   rm -rf "${dir}"
 }
 
 _update_nanorc() {
-  touch $NANORC_FILE
-  # add all includes from ~/.nano/nanorc if they're not already there
+  touch "${NANORC_FILE}"
+  # add all includes from ~/.nano/nanorc if they're not already there.
+  # -F: literal match (include lines contain '.', '*' which are regex metachars)
+  # -x: whole-line match (avoid partial-line false positives)
   while read -r inc; do
-      if ! grep -q "$inc" "${NANORC_FILE}"; then
+      if ! grep -qxF "$inc" "${NANORC_FILE}"; then
           echo "$inc" >> "$NANORC_FILE"
       fi
   done < ~/.nano/nanorc
 }
 
 _update_nanorc_lite() {
-  sed -i '/include "\/usr\/share\/nano\/\*\.nanorc"/i include "~\/.nano\/*.nanorc"' "${NANORC_FILE}"
+  touch "${NANORC_FILE}"
+  # Insert our include line above the system-wide one. Use a tmp file
+  # rather than `sed -i` so the same syntax works on GNU sed (Linux) and
+  # BSD sed (macOS), which disagree on whether -i takes an argument.
+  tmp=$(mktemp)
+  sed '/include "\/usr\/share\/nano\/\*\.nanorc"/i\
+include "~/.nano/*.nanorc"
+' "${NANORC_FILE}" > "$tmp"
+  mv "$tmp" "${NANORC_FILE}"
 }
 
 _version_str_to_num() {
