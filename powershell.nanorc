@@ -26,7 +26,7 @@ icolor green "\<(string|char|byte|int|long|bool|decimal|single|double|DateTime|x
 
 ## Comments
 color cyan start="<#" end="#>"
-# Rule out end-of-block-comment (galenguyer/nano-syntax-highlighting/issues/5)
+# Rule out end-of-block-comment (https://github.com/galenguyer/nano-syntax-highlighting/issues/5)
 color cyan "(^|[[:space:]])#[^>]([^#]|#[^>])*$"
 color brightwhite,yellow "\<(FIXME|TODO|XXX)\>"
 
