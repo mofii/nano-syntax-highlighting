@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+REPO="mofii/nano-syntax-highlighting"
+
 # check for unzip before we continue
 if ! command -v unzip >/dev/null 2>&1; then
   echo 'unzip is required but was not found. Install unzip first and then run this script again.' >&2
@@ -27,16 +29,53 @@ _download() {
   esac
 }
 
+# fetch URL contents to stdout, quietly; empty output on HTTP error
+_fetch() {
+  url="$1"
+  case "$DOWNLOADER" in
+    wget) wget -qO- "$url" ;;
+    curl) curl -fsSL "$url" ;;
+  esac
+}
+
+# resolve an archive URL for the given ref:
+#   - "master" → latest published GitHub release (vX.Y.Z), with a graceful
+#     fallback to the master branch tip if the API call fails
+#   - any "pre-X.Y" branch → branch tip (those legacy branches aren't tagged)
+_resolve_archive_url() {
+  br="$1"
+  if [ "$br" = "master" ]; then
+    tag=$(_fetch "https://api.github.com/repos/${REPO}/releases/latest" \
+          | awk -F'"' '/"tag_name":/ {print $4; exit}')
+    if [ -n "$tag" ]; then
+      echo "https://github.com/${REPO}/archive/refs/tags/${tag}.zip"
+      return
+    fi
+    echo "Could not resolve latest release; falling back to master branch tip." >&2
+  fi
+  echo "https://github.com/${REPO}/archive/refs/heads/${br}.zip"
+}
+
 _fetch_sources() {
   br=$(_find_suitable_branch)
+  url=$(_resolve_archive_url "$br")
+
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' EXIT
+  tmpzip="${tmpdir}/nanorc.zip"
+
   mkdir -p ~/.nano/
   cd ~/.nano/
 
-  _download "/tmp/nanorc.zip" "https://github.com/galenguyer/nano-syntax-highlighting/archive/${br}.zip"
-  unzip -o "/tmp/nanorc.zip"
-  mv "nano-syntax-highlighting-${br}"/* ./
-  rm -rf "nano-syntax-highlighting-${br}"
-  rm -f "/tmp/nanorc.zip"
+  _download "$tmpzip" "$url"
+  unzip -tq "$tmpzip"
+
+  # archive root is "<repo>-<ref>" — for tags GitHub strips a leading "v",
+  # so derive it from the zip itself instead of guessing
+  dir=$(unzip -Z -1 "$tmpzip" | head -1 | cut -d/ -f1)
+  unzip -o "$tmpzip"
+  mv "${dir}"/* ./
+  rm -rf "${dir}"
 }
 
 _update_nanorc() {
