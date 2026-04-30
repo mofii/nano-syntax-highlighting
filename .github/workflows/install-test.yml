@@ -52,5 +52,5 @@ jobs:
 
       - name: Run install.sh scenarios
         run: |
-          chmod +x install.sh tool/test-install.sh
-          ./tool/test-install.sh --quiet
+          chmod +x install.sh tools/test-install.sh
+          ./tools/test-install.sh --quiet

@@ -6,6 +6,6 @@ base=$(cd "$(dirname "$0")/.." && pwd)
 
 shellcheck \
     "$base/install.sh" \
-    "$base/tool/include-list-gen.sh" \
-    "$base/tool/shellcheck.sh" \
-    "$base/tool/test-install.sh"
+    "$base/tools/include-list-gen.sh" \
+    "$base/tools/shellcheck.sh" \
+    "$base/tools/test-install.sh"
