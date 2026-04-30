@@ -12,7 +12,8 @@
 #
 # Usage:
 #   tool/test-install.sh [-l|--lite] [--keep] [--quiet]
-#     -l, --lite   pass -l through to install.sh
+#     -l, --lite   pass -l through to install.sh in scenarios 1-5
+#                  (the dedicated lite scenario at the end always runs -l)
 #     --keep       keep the temp $HOME and $PATH dirs for post-mortem
 #     --quiet      suppress install.sh stdout/stderr (still shows exit code
 #                  and resulting .nanorc)
@@ -74,6 +75,25 @@ trap cleanup EXIT
 
 FAIL=0
 
+# Run install.sh in a fresh sandbox $HOME and return its exit code via the
+# global RUN_RC. `extra=()` lets the caller append per-scenario flags
+# without touching the global INSTALL_ARGS.
+run_install() {
+  local home="$1"; shift
+  local extra=("$@")
+  if (( QUIET )); then
+    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" \
+      ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"} \
+      ${extra[@]+"${extra[@]}"} >/dev/null 2>&1
+    RUN_RC=$?
+  else
+    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" \
+      ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"} \
+      ${extra[@]+"${extra[@]}"}
+    RUN_RC=$?
+  fi
+}
+
 run_scenario() {
   local label="$1" expect="$2"
   local home
@@ -85,27 +105,17 @@ run_scenario() {
   echo "  $label   (expect exit $expect)"
   echo "=============================================================="
 
-  local rc
-  # `${arr[@]+"${arr[@]}"}` is the bash 3.2-safe way to expand an array
-  # under `set -u`; plain `"${arr[@]}"` errors when the array is empty.
-  if (( QUIET )); then
-    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"} \
-      >/dev/null 2>&1
-    rc=$?
-  else
-    HOME="$home" PATH="$TESTBIN" bash "$INSTALL" ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"}
-    rc=$?
-  fi
+  run_install "$home"
 
-  echo "--- exit=$rc ---"
+  echo "--- exit=$RUN_RC ---"
   if [[ -f "$home/.nanorc" ]]; then
     echo "--- resulting \$HOME/.nanorc has $(wc -l <"$home/.nanorc" | tr -d ' ') lines ---"
   else
     echo "--- no \$HOME/.nanorc written ---"
   fi
 
-  if [[ "$rc" -ne "$expect" ]]; then
-    echo "FAIL: $label expected exit $expect, got $rc" >&2
+  if [[ "$RUN_RC" -ne "$expect" ]]; then
+    echo "FAIL: $label expected exit $expect, got $RUN_RC" >&2
     FAIL=1
   fi
 }
@@ -145,6 +155,55 @@ if have wget && have curl; then
   run_scenario "both (wget preferred)" 0
 else
   echo "SKIP: need both wget and curl for the 'both' scenario"
+fi
+
+# 6. Re-install in the same $HOME. Guards against regressions of the
+#    "mv: cannot move ... tool/ exists" / sed "in-place" failures that
+#    surfaced the second time install.sh ran against an existing ~/.nano.
+if have wget && have curl; then
+  reinstall_home=$(mktemp -d -t nanorc-home.XXXXXX)
+  HOMES+=("$reinstall_home")
+  echo
+  echo "=============================================================="
+  echo "  re-install (run twice in same \$HOME)"
+  echo "=============================================================="
+  run_install "$reinstall_home";  rc1=$RUN_RC
+  run_install "$reinstall_home";  rc2=$RUN_RC
+  echo "--- first run exit=$rc1, second run exit=$rc2 ---"
+  if (( rc1 != 0 || rc2 != 0 )); then
+    echo "FAIL: re-install expected both exits 0, got $rc1 then $rc2" >&2
+    FAIL=1
+  fi
+else
+  echo "SKIP: need both wget and curl for the 're-install' scenario"
+fi
+
+# 7. Lite mode. Seeds a stock-style ~/.nanorc, then runs install.sh -l,
+#    then asserts the include line was inserted. This is the only scenario
+#    that exercises _update_nanorc_lite, which uses sed in a way that
+#    differs subtly between GNU (Linux) and BSD (macOS) — running on
+#    both runners in CI is what protects against that regressing.
+if have wget && have curl; then
+  lite_home=$(mktemp -d -t nanorc-home.XXXXXX)
+  HOMES+=("$lite_home")
+  echo 'include "/usr/share/nano/*.nanorc"' > "$lite_home/.nanorc"
+  echo
+  echo "=============================================================="
+  echo "  lite mode (-l)"
+  echo "=============================================================="
+  run_install "$lite_home" -l
+  echo "--- exit=$RUN_RC ---"
+  if (( RUN_RC != 0 )); then
+    echo "FAIL: lite mode expected exit 0, got $RUN_RC" >&2
+    FAIL=1
+  elif ! grep -qxF 'include "~/.nano/*.nanorc"' "$lite_home/.nanorc"; then
+    echo "FAIL: lite mode did not insert 'include \"~/.nano/*.nanorc\"' line" >&2
+    echo "--- resulting \$HOME/.nanorc: ---"
+    cat "$lite_home/.nanorc"
+    FAIL=1
+  fi
+else
+  echo "SKIP: need both wget and curl for the 'lite mode' scenario"
 fi
 
 echo
