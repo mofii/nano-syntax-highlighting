@@ -39,19 +39,19 @@ _fetch() {
 }
 
 # resolve an archive URL for the given ref:
-#   - "master" → latest published GitHub release (vX.Y.Z), with a graceful
-#     fallback to the master branch tip if the API call fails
+#   - "main" → latest published GitHub release (vX.Y.Z), with a graceful
+#     fallback to the main branch tip if the API call fails
 #   - any "pre-X.Y" branch → branch tip (those legacy branches aren't tagged)
 _resolve_archive_url() {
   br="$1"
-  if [ "$br" = "master" ]; then
+  if [ "$br" = "main" ]; then
     tag=$(_fetch "https://api.github.com/repos/${REPO}/releases/latest" \
           | awk -F'"' '/"tag_name":/ {print $4; exit}')
     if [ -n "$tag" ]; then
       echo "https://github.com/${REPO}/archive/refs/tags/${tag}.zip"
       return
     fi
-    echo "Could not resolve latest release; falling back to master branch tip." >&2
+    echo "Could not resolve latest release; falling back to main branch tip." >&2
   fi
   echo "https://github.com/${REPO}/archive/refs/heads/${br}.zip"
 }
@@ -104,8 +104,8 @@ _find_suitable_branch() {
   verstr=$(nano --version 2>/dev/null | awk '/GNU nano/ {print ($3=="version")? $4: substr($5,2)}')
   ver=$(_version_str_to_num "$verstr")
   if [ -z "$ver" ]; then
-    echo "Cannot determine nano's version, fallback to master" >&2
-    echo "master"
+    echo "Cannot determine nano's version, fallback to main" >&2
+    echo "main"
     return
   fi
   branches=(
@@ -117,7 +117,7 @@ _find_suitable_branch() {
     pre-2.3.3
     pre-2.1.6
   )
-  target="master"
+  target="main"
   # find smallest branch that is larger than ver
   for b in "${branches[@]}"; do
     num=$(_version_str_to_num "${b#*pre-}")

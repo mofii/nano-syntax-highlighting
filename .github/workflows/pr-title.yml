@@ -1,0 +1,40 @@
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Conventional Commits prefixes that release-please understands.
+          # `feat` → minor bump, `fix` → patch, `feat!`/`BREAKING CHANGE` → major.
+          # Everything else is non-bumping (won't appear in CHANGELOG headings).
+          types: |
+            feat
+            fix
+            chore
+            docs
+            ci
+            refactor
+            test
+            perf
+            style
+            build
+            revert
+          # Scope is optional — many existing commits use one
+          # (e.g. `feat(install): ...`) but plenty don't.
+          requireScope: false
+          # Discourage capitalised, non-imperative subjects.
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The PR title subject must start with a lowercase letter.
+            Example: `feat(install): fall back to curl when wget is missing`

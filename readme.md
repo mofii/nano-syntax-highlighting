@@ -1,7 +1,8 @@
 # Improved Nano Syntax Highlighting Files
 
-[![shellcheck](https://github.com/galenguyer/nano-syntax-highlighting/actions/workflows/shellcheck.yml/badge.svg?branch=master)](https://github.com/galenguyer/nano-syntax-highlighting/actions/workflows/shellcheck.yml)
-[![installer-sync](https://github.com/galenguyer/nano-syntax-highlighting/actions/workflows/installer-sync.yml/badge.svg?branch=master)](https://github.com/galenguyer/nano-syntax-highlighting/actions/workflows/installer-sync.yml)
+[![shellcheck](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/shellcheck.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/shellcheck.yml)
+[![installer-sync](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/installer-sync.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/installer-sync.yml)
+[![release](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/release.yml)
 
 This repository holds ``{lang}.nanorc`` files that have improved definitions of syntax highlighting for various languages.
 
@@ -16,13 +17,13 @@ There are three ways to install this repo.
 Copy the following code to download and run the installer script:
 
 ```sh
-curl https://raw.githubusercontent.com/galenguyer/nano-syntax-highlighting/master/install.sh | bash
+curl https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh | bash
 ```
 
 If your machine doesn't have `curl` command, use this code:
 
 ```sh
-wget https://raw.githubusercontent.com/galenguyer/nano-syntax-highlighting/master/install.sh -O- | bash
+wget https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh -O- | bash
 ```
 
 This automatically unpacks all the `.nanorc` files to `~/.nano`.
@@ -54,13 +55,13 @@ For readability, we use `$install_path` to represent the path of your choice (in
 
 For single user, run:
 
-- `git clone git@github.com:galenguyer/nano-syntax-highlighting.git $install_path`
-  - or with HTTPS: `git clone https://github.com/galenguyer/nano-syntax-highlighting.git $install_path`
+- `git clone git@github.com:mofii/nano-syntax-highlighting.git $install_path`
+  - or with HTTPS: `git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
 - and then switch to the suitable branch: `$install_path/tool/switch-branch.sh`
 
 For system wide, run:
 
-- `sudo git clone https://github.com/galenguyer/nano-syntax-highlighting.git $install_path`
+- `sudo git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
 - `$install_path/tool/switch-branch.sh`
 
 ## Configuration

@@ -36,11 +36,11 @@ function color_replace() {
 }
 
 
-# ensures current branch is master
-git checkout master
+# ensures current branch is main
+git checkout main
 
-# pulls all new commits made to upstream/master
-# git pull upstream master
+# pulls all new commits made to upstream/main
+# git pull upstream main
 
 # ensure there are no changes to commit
 if [ -n "$(git status --porcelain 2>/dev/null | tail -n 1)" ]; then
@@ -171,9 +171,9 @@ git commit -am "fix: pre-2.1.6: Comment out 'header'" || true
 
 ################################
 
-# git checkout master
-# take care, this will delete all your changes on your forked master
-# git push --force origin master
+# git checkout main
+# take care, this will delete all your changes on your forked main
+# git push --force origin main
 
 echo ""
 echo "Please confirm to force push the following branches:"
@@ -191,4 +191,4 @@ for b in "${branches[@]}"; do
     git push --force -u origin "${b}"
 done
 
-git checkout master
+git checkout main
