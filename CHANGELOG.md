@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/mofii/nano-syntax-highlighting/compare/v1.0.1...v2.0.0) (2026-04-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* nano 6.0+ is now required.
+
+### Features
+
+* drop support for nano &lt; 6.0 ([#8](https://github.com/mofii/nano-syntax-highlighting/issues/8)) ([b18de38](https://github.com/mofii/nano-syntax-highlighting/commit/b18de38ec4ff0f6a8cbcd727d2c13a310490ae9d))
+
 ## [1.0.1](https://github.com/mofii/nano-syntax-highlighting/compare/v1.0.0...v1.0.1) (2026-04-30)
 
 
