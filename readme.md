@@ -8,6 +8,14 @@ This repository holds ``{lang}.nanorc`` files that have improved definitions of 
 
 This repository is forked from [github.com/scopatz/nanorc](https://github.com/scopatz/nanorc) after almost 2 years of no activity from the maintainer.
 
+## Requirements
+
+GNU nano 6.0 or newer (released December 2021). Older nano versions
+expect different colour names and directives than this repository
+ships; if you're stuck on an older release, use
+[galenguyer/nano-syntax-highlighting](https://github.com/galenguyer/nano-syntax-highlighting),
+which still maintains the legacy `pre-*` branches.
+
 ## Installation
 
 There are three ways to install this repo.
@@ -57,12 +65,10 @@ For single user, run:
 
 - `git clone git@github.com:mofii/nano-syntax-highlighting.git $install_path`
   - or with HTTPS: `git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
-- and then switch to the suitable branch: `$install_path/tool/switch-branch.sh`
 
 For system wide, run:
 
 - `sudo git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
-- `$install_path/tool/switch-branch.sh`
 
 ## Configuration
 

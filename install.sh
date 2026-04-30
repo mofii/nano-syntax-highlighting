@@ -38,27 +38,21 @@ _fetch() {
   esac
 }
 
-# resolve an archive URL for the given ref:
-#   - "main" → latest published GitHub release (vX.Y.Z), with a graceful
-#     fallback to the main branch tip if the API call fails
-#   - any "pre-X.Y" branch → branch tip (those legacy branches aren't tagged)
+# resolve the archive URL: prefer the latest published GitHub release
+# (vX.Y.Z), fall back to the main branch tip if the API call fails
 _resolve_archive_url() {
-  br="$1"
-  if [ "$br" = "main" ]; then
-    tag=$(_fetch "https://api.github.com/repos/${REPO}/releases/latest" \
-          | awk -F'"' '/"tag_name":/ {print $4; exit}')
-    if [ -n "$tag" ]; then
-      echo "https://github.com/${REPO}/archive/refs/tags/${tag}.zip"
-      return
-    fi
-    echo "Could not resolve latest release; falling back to main branch tip." >&2
+  tag=$(_fetch "https://api.github.com/repos/${REPO}/releases/latest" \
+        | awk -F'"' '/"tag_name":/ {print $4; exit}')
+  if [ -n "$tag" ]; then
+    echo "https://github.com/${REPO}/archive/refs/tags/${tag}.zip"
+    return
   fi
-  echo "https://github.com/${REPO}/archive/refs/heads/${br}.zip"
+  echo "Could not resolve latest release; falling back to main branch tip." >&2
+  echo "https://github.com/${REPO}/archive/refs/heads/main.zip"
 }
 
 _fetch_sources() {
-  br=$(_find_suitable_branch)
-  url=$(_resolve_archive_url "$br")
+  url=$(_resolve_archive_url)
 
   tmpdir=$(mktemp -d)
   trap 'rm -rf "$tmpdir"' EXIT
@@ -106,44 +100,6 @@ include "~/.nano/*.nanorc"
   mv "$tmp" "${NANORC_FILE}"
 }
 
-_version_str_to_num() {
-  if [ -z "$1" ]; then
-    return
-  fi
-  echo -n "$1" | awk -F . '{printf("%d%02d%02d", $1, $2, $3)}'
-}
-
-_find_suitable_branch() {
-  # find the branch that is suitable for local nano
-  verstr=$(nano --version 2>/dev/null | awk '/GNU nano/ {print ($3=="version")? $4: substr($5,2)}')
-  ver=$(_version_str_to_num "$verstr")
-  if [ -z "$ver" ]; then
-    echo "Cannot determine nano's version, fallback to main" >&2
-    echo "main"
-    return
-  fi
-  branches=(
-    pre-6.0
-    pre-5.0
-    pre-4.5
-    pre-2.9.5
-    pre-2.6.0
-    pre-2.3.3
-    pre-2.1.6
-  )
-  target="main"
-  # find smallest branch that is larger than ver
-  for b in "${branches[@]}"; do
-    num=$(_version_str_to_num "${b#*pre-}")
-    if (( ver < num )); then
-      target="${b}"
-    else
-      break
-    fi
-  done
-  echo "$target"
-}
-
 
 NANORC_FILE=~/.nanorc
 
@@ -151,12 +107,8 @@ case "$1" in
  -l|--lite)
    UPDATE_LITE=1
  ;;
- --find_suitable_branch)
-  _find_suitable_branch
-  exit 0
- ;;
  -h|--help)
-   echo "Install script for nanorc syntax highlights"
+   echo "Install script for nanorc syntax highlights (requires nano 6.0+)."
    echo "Call with -l or --lite to update .nanorc with secondary precedence to existing .nanorc includes"
    exit 0
  ;;
