@@ -1,0 +1,46 @@
+name: install-test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel in-flight runs on the same ref when a new commit arrives.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-install:
+    name: test-install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The script toggles wget/curl/unzip in and out of a sandbox $PATH,
+      # so all four tools need to be installed on the host first.
+      # macOS runners ship without wget; ubuntu runners may lack nano.
+      - name: Install required tools (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends nano wget curl unzip
+
+      - name: Install required tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install wget
+
+      - name: Run install.sh scenarios
+        run: |
+          chmod +x install.sh tool/test-install.sh
+          ./tool/test-install.sh --quiet
