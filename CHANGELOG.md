@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/mofii/nano-syntax-highlighting/compare/v2.1.0...v2.2.0) (2026-05-01)
+
+
+### Features
+
+* **syntax:** add Ghostty terminal configuration highlighting ([#20](https://github.com/mofii/nano-syntax-highlighting/issues/20)) ([0efd4ea](https://github.com/mofii/nano-syntax-highlighting/commit/0efd4ea0ea4c001a05ffce1e93da6d9d98671640))
+
 ## [2.1.0](https://github.com/mofii/nano-syntax-highlighting/compare/v2.0.0...v2.1.0) (2026-05-01)
 
 
