@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Use `env bash` rather than `/bin/bash` so the shebang resolves on
+# FreeBSD/OpenBSD, where bash is a port and lives at /usr/local/bin/bash
+# (no /bin/bash) after `pkg install bash`. Linux and macOS keep working
+# unchanged because env finds the same /bin/bash via $PATH.
 set -e
 
 REPO="mofii/nano-syntax-highlighting"

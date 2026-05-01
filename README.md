@@ -5,9 +5,9 @@
 [![license](https://img.shields.io/github/license/mofii/nano-syntax-highlighting)](LICENSE)
 
 Drop-in syntax highlighting for ~130 languages and file formats in
-[GNU nano][nano] 6.0+. Cross-platform installer (macOS / Linux), with
-a sandboxed install-script test harness, automated semantic releases,
-and CI on both OSes.
+[GNU nano][nano] 6.0+. Cross-platform installer (macOS / Linux /
+FreeBSD), with a sandboxed install-script test harness, automated
+semantic releases, and CI on each.
 
 ## About this fork
 
@@ -28,6 +28,11 @@ different colour names and directives than this repository ships;
 if you're on an older nano, use
 [galenguyer/nano-syntax-highlighting][galenguyer] instead — it
 still maintains the legacy `pre-*` branches.
+
+The installer additionally needs `bash`, `unzip`, and either `curl`
+or `wget`. macOS and mainstream Linux distributions ship all of these
+by default; on FreeBSD / OpenBSD run `pkg install bash unzip curl`
+first.
 
 ## Install
 

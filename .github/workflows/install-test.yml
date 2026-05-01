@@ -54,3 +54,30 @@ jobs:
         run: |
           chmod +x install.sh tools/test-install.sh
           ./tools/test-install.sh --quiet
+
+  test-install-freebsd:
+    name: test-install (freebsd)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # No native FreeBSD runner exists on GitHub-hosted runners, so
+      # vmactions/freebsd-vm spins up a FreeBSD 15 guest under QEMU on
+      # the Ubuntu host and rsyncs $GITHUB_WORKSPACE into it. The
+      # `prepare:` block runs once on first boot; `run:` is the actual
+      # test, executed inside the VM with $PWD = the synced workspace.
+      - name: Test install in FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          # FreeBSD <14 defaults to tcsh, which mishandles array-style
+          # parameter expansion; force /bin/sh for the run script.
+          usesh: true
+          # We don't need the VM's filesystem mirrored back to the host
+          # after the run — saves a noticeable chunk of CI time.
+          copyback: false
+          prepare: |
+            pkg install -y bash unzip curl wget nano
+          run: |
+            chmod +x install.sh tools/test-install.sh
+            ./tools/test-install.sh --quiet
