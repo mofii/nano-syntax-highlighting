@@ -1,0 +1,16 @@
+nano-syntax-highlighting authors
+
+This project is a fork chain. Each holder is listed in the order their
+work was added.
+
+  Anthony Scopatz et al. (2014+)
+    https://github.com/scopatz/nanorc
+
+  Galen Guyer <galen@galenguyer.com> (2022+)
+    https://github.com/galenguyer/nano-syntax-highlighting
+
+  Morten Engelsen <morten@teamengelsen.com> (2026+)
+    https://github.com/mofii/nano-syntax-highlighting
+
+The project is licensed under the GNU General Public License v3.0 or
+later. See LICENSE for the full text.
