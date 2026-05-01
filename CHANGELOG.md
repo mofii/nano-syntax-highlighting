@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/mofii/nano-syntax-highlighting/compare/v2.0.0...v2.1.0) (2026-05-01)
+
+
+### Features
+
+* **install:** add FreeBSD support and CI coverage ([#16](https://github.com/mofii/nano-syntax-highlighting/issues/16)) ([b6af4a7](https://github.com/mofii/nano-syntax-highlighting/commit/b6af4a78eb19b30453ab61fbaa63aa6471ed0f08))
+
 ## [2.0.0](https://github.com/mofii/nano-syntax-highlighting/compare/v1.0.1...v2.0.0) (2026-04-30)
 
 
