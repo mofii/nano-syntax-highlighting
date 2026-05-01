@@ -2,7 +2,6 @@
 
 [![install-test](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/install-test.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/install-test.yml)
 [![release](https://img.shields.io/github/v/release/mofii/nano-syntax-highlighting?label=release&color=blue)](https://github.com/mofii/nano-syntax-highlighting/releases/latest)
-[![license](https://img.shields.io/github/license/mofii/nano-syntax-highlighting)](LICENSE)
 
 Drop-in syntax highlighting for ~130 languages and file formats in
 [GNU nano][nano] 6.0+. Cross-platform installer (macOS / Linux /
@@ -116,7 +115,7 @@ Built on the work of:
 
 - [scopatz/nanorc][scopatz] — original repository.
 - [galenguyer/nano-syntax-highlighting][galenguyer] — predecessor
-  fork that carried the project through 2024.
+  fork that is still actively maintained.
 - The [GNU nano editor][nano], whose stock files are the reference
   for several syntaxes here.
 
