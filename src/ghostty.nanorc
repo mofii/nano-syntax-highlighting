@@ -1,0 +1,58 @@
+## Syntax highlighting for Ghostty terminal configuration files.
+##
+## Matches:
+##   ~/.config/ghostty/config
+##   ~/.config/ghostty/config.ghostty
+##   ~/Library/Application Support/com.mitchellh.ghostty/config
+## See https://ghostty.org/docs/config for the full reference.
+##
+## Design note: Ghostty's option set changes every release, so this
+## file deliberately avoids a hand-curated list of keys or keybind
+## actions. It highlights any kebab-case key on the LHS of `=` and
+## leaves the rest to a few small structural rules.
+
+syntax "ghostty" "(^|/)config\.ghostty$" "(^|/)ghostty/config$" "(^|/)com\.mitchellh\.ghostty/config$"
+comment "#"
+
+## Any kebab-case key followed by `=` (Ghostty keys are lowercase).
+color brightcyan "^[[:space:]]*[a-z][a-z0-9-]*[[:space:]]*="
+
+## Repeatable / structural directives — make these stand out.
+color brightmagenta "^[[:space:]]*(keybind|key-remap|palette|env|theme|config-file|command|initial-command)[[:space:]]*="
+
+## Booleans.
+color brightyellow "\<(true|false)\>"
+
+## Hex colors with explicit # prefix, e.g. `background = #282c34`.
+color brightyellow "#[0-9a-fA-F]{6}\>"
+
+## Bare 6-digit hex colors immediately after `=`, e.g. `background = 282c34`
+## or `palette = 0=ab12cd`. Anchored to avoid matching arbitrary hex-shaped
+## words elsewhere on the line.
+color brightyellow "=[[:space:]]*[0-9a-fA-F]{6}[[:space:]]*$"
+
+## Numbers and percentages as standalone RHS values.
+color green "=[[:space:]]*[-+]?[0-9]+(\.[0-9]+)?%?[[:space:]]*$"
+
+## Quoted string values.
+color yellow ""(\\.|[^"])*"" "'(\\.|[^'])*'"
+
+## Optional `config-file` marker, e.g. `config-file = ?themes/extra`.
+color brightblue "=[[:space:]]*\?[^[:space:]]+"
+
+## Keybind modifiers and joiners.
+color brightmagenta "\<(shift|ctrl|control|alt|opt|option|super|cmd|command)\>"
+
+## Keybind / theme directive prefixes.
+color brightmagenta "\<(global|all|local|unconsumed|performable):"
+color brightmagenta "\<(light|dark):"
+
+## Whole-line comments (Ghostty does not allow trailing comments).
+## Placed last so it wins against any value-level rule on the same line.
+color brightblue "^[[:space:]]*#.*$"
+
+## Reminders.
+color brightwhite,yellow "\<(FIXME|TODO|XXX)\>"
+
+## Trailing whitespace.
+color ,green "[[:space:]]+$"
