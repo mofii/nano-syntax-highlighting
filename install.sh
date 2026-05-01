@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Use `env bash` rather than `/bin/bash` so the shebang resolves on
+# FreeBSD/OpenBSD, where bash is a port and lives at /usr/local/bin/bash
+# (no /bin/bash) after `pkg install bash`. Linux and macOS keep working
+# unchanged because env finds the same /bin/bash via $PATH.
 set -e
 
 REPO="mofii/nano-syntax-highlighting"
@@ -58,29 +62,50 @@ _fetch_sources() {
   trap 'rm -rf "$tmpdir"' EXIT
   tmpzip="${tmpdir}/nanorc.zip"
 
-  mkdir -p ~/.nano/
-  cd ~/.nano/
-
   _download "$tmpzip" "$url"
   unzip -tq "$tmpzip"
 
-  # archive root is "<repo>-<ref>" — for tags GitHub strips a leading "v",
-  # so derive it from the zip itself instead of guessing
-  dir=$(unzip -Z -1 "$tmpzip" | head -1 | cut -d/ -f1)
-  unzip -oq "$tmpzip"
-  # Only copy the syntax files (and the includes manifest). cp (rather than
-  # mv) merges into an existing ~/.nano/, so re-running install.sh doesn't
-  # fail on tools/. -P preserves symlinks (gitcommit.nanorc -> git.nanorc).
+  # Extract into $tmpdir (not ~/.nano/) so we have a clean staging
+  # directory we control: the archive deposits exactly one top-level
+  # directory (its "<repo>-<ref>" archive root) there and nothing else.
   #
-  # v2.0.0 and earlier shipped a flat layout (.nanorc files at archive root);
-  # v2.0.1+ ship them under src/. Try the new layout first, fall back to the
-  # old one so this script works against any tag.
+  # Earlier revisions used `unzip -Z -1` to read the archive root's
+  # name without extracting twice, but that relies on Info-ZIP's
+  # zipinfo mode. FreeBSD's /usr/bin/unzip is bsdunzip (libarchive-
+  # based), which doesn't implement -Z and instead prints "Zipinfo
+  # mode needs additional options" to stderr. We avoid the problem
+  # entirely by extracting into a known-empty $tmpdir and asking the
+  # shell what landed there — no external listing tool, works on every
+  # unzip implementation we care about.
+  unzip -oq "$tmpzip" -d "$tmpdir"
+  shopt -s nullglob
+  dirs=("$tmpdir"/*/)
+  shopt -u nullglob
+  if (( ${#dirs[@]} != 1 )); then
+    echo "install.sh: expected exactly one top-level directory in" \
+         "$tmpzip, got ${#dirs[@]}" >&2
+    exit 1
+  fi
+  dir="${dirs[0]%/}"  # strip trailing slash for cleaner concatenation
+
+  mkdir -p ~/.nano/
+  cd ~/.nano/
+
+  # Only copy the syntax files (and the includes manifest). cp (rather
+  # than mv) merges into an existing ~/.nano/, so re-running install.sh
+  # doesn't fail on tools/. -P preserves symlinks
+  # (gitcommit.nanorc -> git.nanorc).
+  #
+  # v2.0.0 and earlier shipped a flat layout (.nanorc files at archive
+  # root); v2.0.1+ ship them under src/. Try the new layout first, fall
+  # back to the old one so this script works against any tag.
   if [ -d "${dir}/src" ]; then
     cp -P "${dir}"/src/*.nanorc "${dir}"/src/nanorc ./
   else
     cp -P "${dir}"/*.nanorc "${dir}"/nanorc ./
   fi
-  rm -rf "${dir}"
+  # $tmpdir (containing the extracted archive root) is removed by the
+  # EXIT trap, so no explicit rm -rf needed here.
 }
 
 _update_nanorc() {
