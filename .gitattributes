@@ -1,0 +1,13 @@
+# Normalise line endings to LF on checkout/commit so shell scripts don't
+# get CRLF-corrupted on Windows clones.
+* text=auto eol=lf
+
+# The includes manifest is generated from src/*.nanorc by
+# tools/include-list-gen.sh — tell GitHub to:
+#   * exclude it from "Languages" stats (it's not really code)
+#   * collapse it by default in PR diffs (regenerated, never edited by hand)
+src/nanorc linguist-generated=true
+
+# .nanorc files don't have a registered Linguist syntax; mark them so they
+# show up under a sensible name and don't pollute the language pie chart.
+src/*.nanorc linguist-language=Nano

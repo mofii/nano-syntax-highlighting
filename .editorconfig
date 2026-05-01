@@ -1,0 +1,19 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+# Two trailing spaces in Markdown mean "hard line break" — don't strip.
+trim_trailing_whitespace = false
+
+[*.nanorc]
+# nano config files are tab-indented and slightly idiosyncratic; leave the
+# upstream style alone.
+indent_style = tab
+trim_trailing_whitespace = false
