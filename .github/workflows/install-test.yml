@@ -79,5 +79,17 @@ jobs:
           prepare: |
             pkg install -y bash unzip curl wget nano
           run: |
+            # Print VM context up front so any future failure log has the
+            # exact OS / bash / tool versions the job ran against.
+            freebsd-version
+            uname -a
+            bash --version | head -1
+            curl --version | head -1
+            for t in unzip wget nano; do
+              command -v "$t" && "$t" --version | head -1
+            done
             chmod +x install.sh tools/test-install.sh
-            ./tools/test-install.sh --quiet
+            # NOTE: --quiet deliberately omitted here (unlike the Linux/macOS
+            # matrix) — the FreeBSD job is newer and we want install.sh's
+            # full stdout/stderr in the log if a scenario fails.
+            ./tools/test-install.sh
