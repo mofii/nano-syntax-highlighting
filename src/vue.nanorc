@@ -1,0 +1,130 @@
+## Syntax highlighting for Vue single-file components (.vue).
+##
+## Vue files are HTML at heart, with extras: directives (v-if, v-for,
+## v-bind, ...), shorthand directives (@click, :key, ...), Mustache
+## interpolation ({{ msg }}), and three "section" tags: <template>,
+## <script>, <style>. Nano's syntax engine is single-language-per-file,
+## so we can't perfectly highlight JS-in-<script> and CSS-in-<style>
+## the way an IDE would. The strategy is three layers, in this order:
+##
+##   1. HTML/XML skeleton (mirrored verbatim from src/xml.nanorc).
+##   2. Vue-specific extras (SFC section tags, directives, mustache).
+##   3. Shared "content" rules (strings, numbers, JS keywords, CSS
+##      property declarations, line/block comments). These apply to
+##      the whole file but are written so HTML and template sections
+##      still look right.
+##
+
+syntax "vue" "\.vue$"
+comment "<!--|-->"
+
+# ---- HTML/XML skeleton (mirror of src/xml.nanorc) -------------------
+color white "^.+$"
+# Attributes
+color green  start="<" end=">"
+color brightgreen "=\"[^\"]*\""
+# Opening tags
+color brightcyan   "<[^/][^> ]*"
+color brightcyan   ">"
+# Closing tags
+color cyan "</[^> ]*>"
+# Self-closing part
+color cyan "/>"
+color yellow start="<!DOCTYPE" end="[/]?>"
+color red    "&[^;]*;"
+
+# ---- Vue-specific extras --------------------------------------------
+# Single-file-component section tags. Painted distinctly from generic
+# HTML so the file's structural skeleton (template / script / style)
+# stands out at a glance.
+color brightmagenta "</?(template|script|style)\>[^>]*>"
+
+# Block directives — full `v-*` form. Word-bounded works fine here
+# because all alternatives start with the word character `v`.
+color magenta "\<(v-if|v-else|v-else-if|v-for|v-model|v-on|v-bind|v-text|v-html|v-show|v-slot|v-pre|v-once|v-cloak|v-memo)\>"
+
+# Shorthand directives — `@event` (v-on:) and `:prop` (v-bind:). The
+# usual `\<` start-of-word anchor doesn't work for these because `@`
+# and `:` are non-word characters and `\<` requires a transition INTO
+# a word character. Instead, require the directive to follow a space,
+# a line start, or `<`. Covers virtually all real-world cases without
+# accidentally colouring `:` in things like `localhost:3000`.
+color magenta "(^|[[:space:]<])[@:][a-zA-Z_][a-zA-Z0-9_.-]*"
+
+# Mustache interpolation: {{ expression }}. Stops at the first `}`,
+# which is correct for ~all real expressions; nested object literals
+# inside an interpolation are outside what nano's regex engine can
+# match cleanly anyway.
+color brightwhite "\{\{[^}]*\}\}"
+
+# ---- Shared content rules (JS-in-<script>, CSS-in-<style>) ----------
+# Nano can't switch syntax engines per SFC section, so these rules
+# apply file-wide. They're sequenced so HTML/template colouring above
+# is preserved (later rules win per character — the comment block at
+# the very bottom is the safety net for code-inside-comments).
+
+# Property access — `.identifier`. Catches Vue's idiomatic `.value`
+# ref accessor as well as any chained property/method reference like
+# `.toLowerCase`, `.filter`, `.split`. Will also match `.5` inside a
+# number like `1.5` — intentional; the number rule further down
+# overrides for actual numerics. Also matches CSS class selectors
+# like `.buttons` (acceptable — they're conceptually labels too).
+color brightred "\.[a-zA-Z_][a-zA-Z_0-9]*"
+
+# Function / method calls — any identifier immediately followed by
+# `(`. Catches top-level calls (`hasValidInput(`, `computed(`,
+# `ref(`) and method calls (`.toLowerCase(`, `.filter(`). The `(`
+# is part of the match because POSIX ERE has no lookahead — visually
+# fine. The JS-keyword rule further down overrides this so `if(` and
+# `while(` (no space) stay coloured as keywords, not as functions.
+color cyan "\<[a-zA-Z_][a-zA-Z_0-9]*\("
+
+# Strings. Single and double quoted are single-line; backtick template
+# literals can span lines, so they get the start=/end= form. Note that
+# the literal `"` inside a regex-string must be escaped as \" — that
+# was the bug the original snippet had.
+color yellow "\"(\\.|[^\"])*\""
+color yellow "'(\\.|[^'])*'"
+color yellow start="\`" end="\`"
+
+# Template-literal interpolation: ${expression} inside backticks.
+# Stops at the first `}`, like Vue's Mustache rule above. Placed
+# after the backtick string rule so it overrides yellow inside `...`.
+color brightwhite "\$\{[^}]*\}"
+
+# Numbers — decimal, hex, scientific — optionally with CSS units
+# (e.g. 10px, 1.5em, 200ms). Word-bounded.
+color brightyellow "\<(0x[0-9a-fA-F]+|[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?)(px|em|rem|%|vh|vw|fr|ch|ex|s|ms|deg)?\>"
+
+# CSS hex colours — #rgb, #rrggbb, #rrggbbaa.
+color brightyellow "#[0-9a-fA-F]{3,8}\>"
+
+# JavaScript keywords. Word-bounded. `class` and `for` will also
+# light up where they appear as HTML attributes — minor cosmetic
+# overlap, not a correctness issue.
+color brightblue "\<(async|await|break|case|catch|class|const|continue|default|delete|do|else|export|extends|finally|for|from|function|get|if|import|in|instanceof|let|new|null|of|return|set|static|super|switch|this|throw|true|false|try|typeof|undefined|var|void|while|with|yield)\>"
+
+# CSS property declarations / JS object-literal keys: indented
+# identifier followed by `:`. Catches `font-size:`, `margin:`, and
+# also JS object keys like `foo: 1` — both are conceptually labels
+# and look right in the same colour.
+color brightcyan "^[[:space:]]*[a-zA-Z-][a-zA-Z0-9-]*[[:space:]]*:"
+
+# ---- Comments (last, so they override any rule above within them) ---
+# Block comments — JS and CSS both use /* ... */
+color blue start="/\*" end="\*/"
+
+# Line comments — `// ...`. Excludes `://` (URLs) and `//` inside
+# single/double quoted strings, both common false positives.
+color blue "(^|[^:/\"'])//[^\n]*$"
+
+# HTML comments — moved here from the xml.nanorc body so all comment
+# styles "absorb" their content uniformly.
+color yellow start="<!--" end="-->"
+
+# FIXME/TODO/XXX — placed after every comment rule so they pop inside
+# both HTML and JS/CSS comments (matching xml.nanorc's intent).
+color brightwhite,yellow "\<(FIXME|TODO|XXX)\>"
+
+# ---- Trailing spaces (parity with xml.nanorc) -----------------------
+color ,green "[[:space:]]+$"
