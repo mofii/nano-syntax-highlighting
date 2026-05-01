@@ -1,127 +1,120 @@
-# Improved Nano Syntax Highlighting Files
+# Improved Nano Syntax Highlighting
 
-[![shellcheck](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/shellcheck.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/shellcheck.yml)
-[![installer-sync](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/installer-sync.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/installer-sync.yml)
-[![release](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/release.yml)
+[![install-test](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/install-test.yml/badge.svg?branch=main)](https://github.com/mofii/nano-syntax-highlighting/actions/workflows/install-test.yml)
+[![release](https://img.shields.io/github/v/release/mofii/nano-syntax-highlighting?label=release&color=blue)](https://github.com/mofii/nano-syntax-highlighting/releases/latest)
+[![license](https://img.shields.io/github/license/mofii/nano-syntax-highlighting)](LICENSE)
 
-This repository holds ``{lang}.nanorc`` files that have improved definitions of syntax highlighting for various languages.
+Drop-in syntax highlighting for ~130 languages and file formats in
+[GNU nano][nano] 6.0+. Cross-platform installer (macOS / Linux), with
+a sandboxed install-script test harness, automated semantic releases,
+and CI on both OSes.
 
-This repository is forked from [github.com/scopatz/nanorc](https://github.com/scopatz/nanorc) after almost 2 years of no activity from the maintainer.
+## About this fork
+
+This is the third in the chain
+[scopatz/nanorc][scopatz] →
+[galenguyer/nano-syntax-highlighting][galenguyer] → this repo. It
+exists to keep the project moving: the upstream installer didn't work
+on macOS without `wget`, and the fix wasn't adopted there. While the
+doors were open this fork also picked up idempotent re-installs,
+GNU vs. BSD `sed` handling, action-version upkeep via Dependabot,
+branch protection, and a Conventional-Commit release flow. Issues
+and PRs here are reviewed.
 
 ## Requirements
 
-GNU nano 6.0 or newer (released December 2021). Older nano versions
-expect different colour names and directives than this repository
-ships; if you're stuck on an older release, use
-[galenguyer/nano-syntax-highlighting](https://github.com/galenguyer/nano-syntax-highlighting),
-which still maintains the legacy `pre-*` branches.
+GNU nano 6.0 or newer (released December 2021). Older nano expects
+different colour names and directives than this repository ships;
+if you're on an older nano, use
+[galenguyer/nano-syntax-highlighting][galenguyer] instead — it
+still maintains the legacy `pre-*` branches.
 
-## Installation
+## Install
 
-There are three ways to install this repo.
+### Automatic (recommended)
 
-### 1. Automatic installer
-
-Copy the following code to download and run the installer script:
+Pipe the installer to your shell:
 
 ```sh
-curl https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh | bash
 ```
 
-If your machine doesn't have `curl` command, use this code:
+Or with `wget`:
 
 ```sh
-wget https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh -O- | bash
+wget -qO- https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh | bash
 ```
 
-This automatically unpacks all the `.nanorc` files to `~/.nano`.
+The installer:
 
-#### Note
+1. Downloads the
+   [latest release](https://github.com/mofii/nano-syntax-highlighting/releases/latest)
+   and unpacks the syntax files into `~/.nano/`.
+2. Wires up `~/.nano/`-style includes into `~/.nanorc`.
 
-Some syntax definitions which exist in Nano upstream may be preferable to the ones provided by this package.
-The `install.sh` script may be run with `-l` or `--lite` to insert the included syntax definitions from this package with *lower* precedence than the ones provided by the standard package.
+That's it — open a file in nano and you should see colour. No further
+configuration step is required.
 
-### 2. Package managers
+#### Lite mode
 
-As this is a fork, it is not (yet) available in any official repositories.
+If you want this fork's syntaxes inserted with *lower* precedence than
+nano's stock ones (so upstream definitions win on conflict), pass `-l`:
 
-<!-- The follow table lists all systems with this package published.
-Feel free to add your official package manager.
-
-> Systems that are based in others' package managers or repositories are compatible. For example: `pacman` based systems are compatible with `Arch Linux`.
-
-| System     | Command                                  |
-| ---------- | ---------------------------------------- |
-| Arch Linux | `pacman -S nano-syntax-highlighting`     | -->
-
-### 3. Clone repo (copy the files)
-
-The files should be placed inside of the `~/.nano/` directory.
-
-You may put the files to a different directory, for example to `~/.nano/nanorc/`.
-For readability, we use `$install_path` to represent the path of your choice (in *system wide* the path is always `/usr/share/nano-syntax-highlighting/`).
-
-For single user, run:
-
-- `git clone git@github.com:mofii/nano-syntax-highlighting.git $install_path`
-  - or with HTTPS: `git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
-
-For system wide, run:
-
-- `sudo git clone https://github.com/mofii/nano-syntax-highlighting.git $install_path`
-
-## Configuration
-
-After installation, you need to inform `nano` to used the new highlight files.
-The configuration file is located at `~/.nanorc`, for users, and at `/etc/nanorc`, for system wide.
-If this file doesn't exist, create a new one.
-
-Again there are three ways:
-
-### 1. Include all
-
-Append the content of the folder in one line, with wildcard:
-
-`echo "include $install_path/*.nanorc" >> ~/.nanorc` or
-`echo "include $install_path/*.nanorc" >> /etc/nanorc`
-
-### 2. Include/append our `nanorc` file
-
-Simply run:
-
-`cat $install_path/nanorc >> ~/.nanorc` or
-`cat $install_path/nanorc >> /etc/nanorc`
-
-### 3. One by one
-
-Add your preferable languages one by one into the file. For example:
-
-```
-## C/C++
-include "~/.nano/c.nanorc"
+```sh
+curl -fsSL https://raw.githubusercontent.com/mofii/nano-syntax-highlighting/main/install.sh | bash -s -- -l
 ```
 
-## Tricks & Tweaks
+### Manual
 
-### MacOS
+Clone the repo somewhere on your machine:
 
-`\<` and `\>` are regular character escapes on MacOS.
-The bug is fixed in Nano, but this might be a problem if you are using an older version
-If this is the case, replace them respectively with `[[:<:]]` and `[[:>:]]`.
-This is reported in [Issue 52](https://github.com/scopatz/nanorc/issues/52).
+```sh
+git clone https://github.com/mofii/nano-syntax-highlighting.git ~/.nano-syntax-highlighting
+```
 
-### Why not include the original files?
+Then add one of the following to your `~/.nanorc` (or `/etc/nanorc`
+for system-wide):
 
-Good question! It's due to the way that nano reads the files, the regex instructions should be in a _specific order_ which is evident in some nanorc files.
-And if we use the `include` or `extendsyntax` commands, the colors or other things may not work as expected.
-The best way to make changes is by copying and editing the original files.
-Please see this [issue](https://savannah.gnu.org/bugs/index.php?5698).
-But if some original nanorc file needs an update, feel free to [patch it](https://savannah.gnu.org/patch/?func=additem&group=nano)!
+```nanorc
+# Include all syntaxes (recommended)
+include "~/.nano-syntax-highlighting/src/*.nanorc"
 
-### My shortcut is not working!
+# Or include the prebuilt manifest (one include line per syntax)
+include "~/.nano-syntax-highlighting/src/nanorc"
 
-Please see this [issue](https://savannah.gnu.org/bugs/?56994).
+# Or pick specific languages
+include "~/.nano-syntax-highlighting/src/c.nanorc"
+include "~/.nano-syntax-highlighting/src/python.nanorc"
+```
+
+Pick whichever clone path suits you (`~/.nano-syntax-highlighting/`
+above is just a default that doesn't collide with the automatic
+installer's `~/.nano/`).
+
+## Contributing
+
+PRs welcome. The short version:
+
+- **Add a new syntax**: drop `<lang>.nanorc` into [`src/`](src/),
+  then run `tools/include-list-gen.sh` to refresh `src/nanorc`.
+- **Test locally**: `tools/test-install.sh` exercises the installer
+  end-to-end in a sandboxed `$HOME` (covers `unzip`/`wget`/`curl`
+  guards, idempotent re-install, and lite mode).
+- **PR titles** must be Conventional Commits (`feat:`, `fix:`,
+  `chore:`, …); see [`CONTRIBUTING.md`](CONTRIBUTING.md) for the
+  full conventions, the version-bump table, and the required CI
+  checks before merge.
 
 ## Acknowledgements
 
-Some of these files are derived from the original [Nano](https://www.nano-editor.org) editor [repo](https://git.savannah.gnu.org/cgit/nano.git)
+Built on the work of:
+
+- [scopatz/nanorc][scopatz] — original repository.
+- [galenguyer/nano-syntax-highlighting][galenguyer] — predecessor
+  fork that carried the project through 2024.
+- The [GNU nano editor][nano], whose stock files are the reference
+  for several syntaxes here.
+
+[scopatz]: https://github.com/scopatz/nanorc
+[galenguyer]: https://github.com/galenguyer/nano-syntax-highlighting
+[nano]: https://www.nano-editor.org
